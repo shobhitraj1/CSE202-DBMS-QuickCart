@@ -1,4 +1,6 @@
 # CSE202-DBMS-QuickCart
+
+📘 **Course Overview:**
 This repository contains my project (source code &amp; submissions) for the [DBMS](https://techtree.iiitd.edu.in/viewDescription/filename?=CSE202) course at IIIT Delhi in Winter 2024.
 
 📂 **Folder Structure:**
@@ -17,7 +19,7 @@ Instructor's name - Vikram Goyal (vikram@iiitd.ac.in)<br>
 Course Code - CSE202
 
 🧑‍🤝‍🧑 **Other Contributors:**
-My IIIT Delhi batchmates Aarzoo, Sidhartha Garg & Vanshika Pal also contributed in making of this web application.
+My IIIT Delhi batchmates Aarzoo, Sidhartha Garg & Vanshika Pal also contributed in the submissions.
 
 📌 **Important:**
 Please make sure to follow the guidelines and policies outlined by the institution regarding the use of shared coursework materials. Use this repository responsibly and avoid any violations of academic integrity. Submissions are provided for reference purposes only. It's recommended to understand the submissions and implement them independently.
