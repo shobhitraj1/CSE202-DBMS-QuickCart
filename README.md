@@ -1,7 +1,8 @@
 # CSE202-DBMS-QuickCart
 
 📘 **Project Overview:** <br>
-This repository contains my project (source code &amp; submissions) for the [DBMS](https://techtree.iiitd.edu.in/viewDescription/filename?=CSE202) course at IIIT Delhi in Winter 2024. Developed a full-stack online retail system featuring user, admin, and delivery agent modes for seamless browsing, purchasing, and management of products. Integrated SQL queries, triggers, transactions and designed ER Diagrams to ideate a structure to ensure ACID properties, emphasizing robust Database Management Systems.
+This repository contains my project (source code &amp; submissions) for the [DBMS](https://techtree.iiitd.edu.in/viewDescription/filename?=CSE202) course at IIIT Delhi in Winter 2024. <br>
+Developed a full-stack online retail system featuring user, admin, and delivery agent modes for seamless browsing, purchasing, and management of products. Integrated SQL queries, triggers, transactions and designed ER Diagrams to ideate a structure to ensure ACID properties, emphasizing robust Database Management Systems.
 
 
 📂 **Folder Structure:**
