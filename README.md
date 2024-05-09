@@ -1,6 +1,6 @@
 # CSE202-DBMS-QuickCart
 
-📘 **Course Overview:**
+📘 **Course Overview:** <br>
 This repository contains my project (source code &amp; submissions) for the [DBMS](https://techtree.iiitd.edu.in/viewDescription/filename?=CSE202) course at IIIT Delhi in Winter 2024.
 
 📂 **Folder Structure:**
