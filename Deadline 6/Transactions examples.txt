@@ -1,0 +1,127 @@
+-- The non conflicting and conflicting nature of the transactions can be shown by running the pair of transactions concurrently on 2 MySQL Shells.
+
+-- NON CONFLICTING TRANSACTIONS - Any scheduling or order of execution of these pair of transactional operations will not result in conflict
+
+-- Transaction Pair 1 (Delivering Orders)
+
+INSERT INTO `order` (status, total_price, time, location, agentPayment, customerID, agentID) VALUES
+('Confirmed', 80.25, '2023-07-15 08:45:00', "I-56, Karol Bagh, New Delhi", 80, 1, 2),
+('Confirmed', 120.50, '2023-07-16 09:30:00', "X-78, Crossing Republik, Ghaziabad", 100, 2, 4);
+
+UPDATE deliveryAgent SET availabilityStatus = 'Busy' WHERE agentID = 2;
+UPDATE deliveryAgent SET availabilityStatus = 'Busy' WHERE agentID = 4;
+
+SELECT * FROM `order`;
+SELECT * FROM deliveryAgent;
+
+-- Transaction 1 - Agent '2' is delivering order '56' and corresponding changes are made in the database in the required action
+START TRANSACTION;
+UPDATE `order` SET status = 'Delivered' WHERE orderID = 56; 
+UPDATE deliveryAgent SET availabilityStatus = 'Available' WHERE agentID = 2;
+UPDATE delivery_agent_wallet SET earning_balance = earning_balance + 80 WHERE agentID = 2;
+COMMIT;
+
+-- Transaction 2 - Agent '4' is delivering order '57' and corresponding changes are made in the database in the required action
+START TRANSACTION;
+UPDATE `order` SET status = 'Delivered' WHERE orderID = 57;
+UPDATE deliveryAgent SET availabilityStatus = 'Available' WHERE agentID = 4;
+UPDATE delivery_agent_wallet SET earning_balance = earning_balance + 100 WHERE agentID = 4;
+COMMIT;
+
+
+-- Transaction Pair 2 (Browsing and Adding to Cart)
+
+-- Transaction 1 - Customer '12' is adding product '1' to their cart and corresponding changes are made in the database in the required action
+START TRANSACTION;
+SELECT * FROM product WHERE productID = 1;
+INSERT INTO addsToCart (customerID, productID, quantity) VALUES (12,1,5);
+COMMIT;
+
+-- Transaction 2 - Customer '13' is adding product '1' to their cart and corresponding changes are made in the database in the required action
+START TRANSACTION;
+SELECT * FROM product WHERE productID = 1;
+INSERT INTO addsToCart (customerID, productID, quantity) VALUES (13,1,7);
+COMMIT;
+
+-- Transaction Pair 3 (Giving Order Review)
+
+SELECT * FROM ProductReview;
+
+-- Transaction 1 - Customer '19' is giving review for their order '54' and corresponding changes are made in the database in the required action
+START TRANSACTION;
+INSERT INTO ProductReview (ProductReviewID, orderID, customerID, comment, rating) VALUES (19, 54, 19, 'Good Quality', 4);
+COMMIT;
+
+-- Transaction 2 - Customer '20' is giving review for their order '55' and corresponding changes are made in the database in the required action
+START TRANSACTION;
+INSERT INTO ProductReview (ProductReviewID, orderID, customerID, comment, rating) VALUES (20, 55, 20, 'Amazing', 5);
+COMMIT;
+
+
+-- Transaction Pair 4 (Withdraw Money)
+
+SELECT * FROM delivery_agent_wallet;
+UPDATE delivery_agent_wallet SET earning_balance = earning_balance + 20 WHERE agentID = 1;
+UPDATE delivery_agent_wallet SET earning_balance = earning_balance + 30 WHERE agentID = 2;
+
+-- Transaction 1 - Delivery Agent '1' withdrawing money from their wallet and corresponding changes are made in the database in the required action
+START TRANSACTION;
+SELECT earning_balance FROM delivery_agent_wallet WHERE agentID = 1;
+UPDATE delivery_agent_wallet SET earning_balance = earning_balance - 20, earning_paid = earning_paid + 20 WHERE agentID = 1;
+COMMIT;
+
+-- Transaction 2 - Delivery Agent '2' withdrawing money from their wallet and corresponding changes are made in the database in the required action
+START TRANSACTION;
+SELECT earning_balance FROM delivery_agent_wallet WHERE agentID = 2;
+UPDATE delivery_agent_wallet SET earning_balance = earning_balance - 30, earning_paid = earning_paid + 30 WHERE agentID = 2;
+COMMIT;
+
+
+-- CONFLICTING TRANSACTIONS
+
+-- Transaction Pair 1 - A conflicting transaction where two users attempt to buy the same product, at the same time.
+
+-- Transaction 1 - Customer '1' placing the order with product '1'
+START TRANSACTION;
+UPDATE product SET stock = stock - 5 WHERE productID = 1; -- 1
+UPDATE wallet SET balance = balance - (SELECT price FROM product WHERE productID = 1 )*5 WHERE customerID = 1; -- 3
+COMMIT; -- 5
+
+-- Transaction 2 - Customer '2' placing the order with product '1'
+START TRANSACTION;
+UPDATE product SET stock = stock - 7 WHERE productID = 1; -- 2
+UPDATE wallet SET balance = balance - (SELECT price FROM product WHERE productID = 1 )*7 WHERE customerID = 2; -- 4
+COMMIT; -- 6
+
+-- Transaction Pair 2 - A conflicting transaction between an admin deleting a product and a customer checking out with that product.
+
+SELECT * FROM product;
+SELECT * FROM `order`;
+
+-- Transaction 1 - Admin deleting product '2'
+START TRANSACTION;
+SELECT * FROM product WHERE productID = 2; -- 1
+DELETE FROM product WHERE productID = 2; -- 3
+COMMIT; -- 5
+
+-- Transaction 2 - Customer purchasing product '2'
+START TRANSACTION;
+SELECT * FROM product WHERE productID = 2 AND stock > 0; -- 2
+UPDATE product SET stock = stock - 1 WHERE productID = 2; -- 4
+INSERT INTO `order` (status, total_price, time, location, agentPayment, customerID, agentID) VALUES ('Delivered', 200.00, NOW(),"I-56, Karol Bagh, New Delhi",DEFAULT,1,3); -- 6
+COMMIT; -- 7
+
+
+-- Transaction Pair 3 - Conflicting transactions may arise when two customers tip the same delivery agent for their past orders.
+
+-- Transaction 1 - Customer '1' adding tip for delivery agent '1'
+START TRANSACTION;
+SELECT earning_balance FROM delivery_agent_wallet WHERE agentID = 1; -- 1
+UPDATE delivery_agent_wallet SET earning_balance = earning_balance + 25 , earning_total = earning_total + 25 WHERE agentID = 1; -- 4
+COMMIT; -- 6
+
+-- Transaction 2 - Customer '2' adding tip for delivery agent '1'
+START TRANSACTION;
+SELECT earning_balance FROM delivery_agent_wallet WHERE agentID = 1; -- 2
+UPDATE delivery_agent_wallet SET earning_balance = earning_balance + 10 , earning_total = earning_total + 10  WHERE agentID = 1; -- 3
+COMMIT; -- 5
